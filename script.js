@@ -88,25 +88,31 @@ function resetSliderToMiddle(event) {
 }
 
 const toggleBtn = document.getElementById('toggleBtn');
-let isShowingOriginal = true; // Tracks whether the original image is displayed
+let isShowingOriginal = false; // Start by showing the edited image
 
 // Toggle between original and edited image
 toggleBtn.addEventListener('click', () => {
-    if (originalImageData && currentImageData) {
-        if (isShowingOriginal) {
-            // Show the edited image
+    if (!originalImageData) {
+        alert('No image loaded to compare.');
+        return;
+    }
+
+    if (isShowingOriginal) {
+        // Show the edited image
+        if (currentImageData) {
             ctx.putImageData(currentImageData, 0, 0);
             toggleBtn.textContent = 'Before';
-        } else {
-            // Show the original image
-            ctx.putImageData(originalImageData, 0, 0);
-            toggleBtn.textContent = 'After';
         }
-        isShowingOriginal = !isShowingOriginal; // Toggle state
+    } else {
+        // Show the original image
+        ctx.putImageData(originalImageData, 0, 0);
+        toggleBtn.textContent = 'After';
     }
+
+    isShowingOriginal = !isShowingOriginal; // Toggle the state
 });
 
-// Store a backup of the original image on canvas
+// Store a backup of the current image after adjustments
 let currentImageData = null;
 
 // Apply adjustments and save the current state
@@ -121,11 +127,12 @@ function applyAdjustments() {
         // Save the current adjusted state
         currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-        // Reset toggle state to "After" mode
+        // Reset toggle button to show the edited image
         isShowingOriginal = false;
         toggleBtn.textContent = 'Before';
     }
 }
+
 
 
 // Event listeners for sliders

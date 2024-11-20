@@ -1,8 +1,10 @@
 from flask import Flask, request, send_file
+from flask_cors import CORS
 from PIL import Image, ImageEnhance
 import io
 
 app = Flask(__name__)
+CORS(app)  # Enables CORS for all routes by default
 
 @app.route('/process', methods=['POST'])
 def process_image():

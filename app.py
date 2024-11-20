@@ -1,13 +1,8 @@
-from PIL import Image, ImageEnhance
-import os
 from flask import Flask, request, send_file
-
+from PIL import Image, ImageEnhance
+import io
 
 app = Flask(__name__)
-
-# Directory to save processed images
-OUTPUT_DIR = os.path.join(os.getcwd(), "static")
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 @app.route('/')
 def home():
@@ -26,33 +21,31 @@ def home():
 
 @app.route('/process', methods=['POST'])
 def process_image():
-    if 'image' not in request.files:
-        return "No file uploaded.", 400
-    
-    image_file = request.files['image']
-    image = Image.open(image_file)
+    try:
+        if 'image' not in request.files:
+            return "No file uploaded.", 400
+        
+        image_file = request.files['image']
+        image = Image.open(image_file)
 
-    # Darken the image
-    enhancer = ImageEnhance.Brightness(image)
-    darkened_image = enhancer.enhance(0.3)  # Adjust this factor to control darkness
+        # Darken the image
+        enhancer = ImageEnhance.Brightness(image)
+        darkened_image = enhancer.enhance(0.8)
 
-    # Save the processed image
-    output_path = os.path.join(OUTPUT_DIR, "darkened_image.png")
-    print(f"Saving image to: {output_path}")
-    darkened_image.save(output_path)
+        # Save the processed image to an in-memory buffer
+        img_io = io.BytesIO()
+        darkened_image.save(img_io, format="PNG")
+        img_io.seek(0)  # Move cursor to the beginning of the buffer
 
-    # Provide the processed image as a download
-    return f'''
-    <!DOCTYPE html>
-    <html>
-    <body>
-        <h2>Image successfully darkened!</h2>
-        <img src="/{output_path}" alt="Darkened Image">
-        <br><br>
-        <a href="/{output_path}" download>Download the image</a>
-    </body>
-    </html>
-    '''
+        # Provide the image as a downloadable file
+        return send_file(
+            img_io,
+            mimetype="image/png",
+            as_attachment=True,
+            download_name="darkened_image.png"
+        )
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)

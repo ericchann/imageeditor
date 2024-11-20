@@ -39,3 +39,11 @@ canvas {
 #downloadBtn:hover {
     background-color: #0056b3;
 }
+input[type="range"] {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+input[type="range"]:hover {
+    transform: scale(1.05);
+}

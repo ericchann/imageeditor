@@ -1,49 +1,106 @@
+/* General styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
     text-align: center;
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
+    background-color: #1a2a3a; /* Navy blue background */
+    color: #f0f0f0; /* Light text for contrast */
 }
 
 .container {
     max-width: 600px;
     margin: 50px auto;
     padding: 20px;
-    border: 1px solid #ddd;
-    background: #fff;
+    border: 1px solid #2b3b4b; /* Darker border for subtle contrast */
+    background: #1e2e3e; /* Slightly lighter navy blue */
     border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Modern shadow effect */
 }
 
+/* Canvas styling */
 canvas {
     display: block;
     margin: 20px auto;
     max-width: 100%;
-    border: 1px solid #ccc;
+    border: 1px solid #3b4b5b;
+    background-color: #f9f9f9; /* White background for canvas */
+    border-radius: 5px;
 }
 
+/* Slider container styles */
 .slider-container {
     margin: 20px 0;
 }
 
-#downloadBtn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
     font-size: 16px;
-    border-radius: 5px;
 }
 
-#downloadBtn:hover {
-    background-color: #0056b3;
-}
+/* Input slider styling */
 input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #3b4b5b;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
 }
 
 input[type="range"]:hover {
-    transform: scale(1.05);
+    opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: 2px solid #007bff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #0056b3;
+}
+
+/* Button styles */
+button {
+    background-color: #007bff; /* Bright navy blue */
+    color: white;
+    border: none;
+    padding: 15px 30px; /* Larger button size */
+    font-size: 18px; /* Modern font size */
+    cursor: pointer;
+    border-radius: 8px; /* Rounded corners for a modern look */
+    margin: 10px 0;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+button:active {
+    transform: scale(0.98); /* Shrink slightly on click */
+}
+
+/* Specific button styles */
+#downloadBtn {
+    background-color: #28a745; /* Green for download button */
+}
+
+#downloadBtn:hover {
+    background-color: #218838; /* Darker green on hover */
 }

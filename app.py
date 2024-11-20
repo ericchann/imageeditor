@@ -2,10 +2,11 @@ from PIL import Image, ImageEnhance
 import os
 from flask import Flask, request, send_file
 
+
 app = Flask(__name__)
 
 # Directory to save processed images
-OUTPUT_DIR = "static"
+OUTPUT_DIR = os.path.join(os.getcwd(), "static")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 @app.route('/')
@@ -37,6 +38,7 @@ def process_image():
 
     # Save the processed image
     output_path = os.path.join(OUTPUT_DIR, "darkened_image.png")
+    print(f"Saving image to: {output_path}")
     darkened_image.save(output_path)
 
     # Provide the processed image as a download

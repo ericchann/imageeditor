@@ -4,6 +4,7 @@ const contrastSlider = document.getElementById('contrast');
 const canvas = document.getElementById('imageCanvas');
 const ctx = canvas.getContext('2d');
 const downloadBtn = document.getElementById('downloadBtn');
+const exampleBtn = document.getElementById('exampleBtn');
 
 let originalImageData = null;
 
@@ -27,6 +28,26 @@ imageInput.addEventListener('change', (event) => {
         };
         reader.readAsDataURL(file);
     }
+});
+
+// Load the example photo
+exampleBtn.addEventListener('click', () => {
+    const exampleImageSrc = 'IMG_1879.JPG'; // Replace with the path to your photo in the repo
+    const image = new Image();
+    image.src = exampleImageSrc;
+
+    image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        // Save the original image data for adjustments
+        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    };
+
+    image.onerror = () => {
+        alert('Failed to load the example image. Please check the file path.');
+    };
 });
 
 // Apply brightness and contrast adjustments

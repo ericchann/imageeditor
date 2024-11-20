@@ -15,13 +15,16 @@ def process_image():
         image_file = request.files['image']
         image = Image.open(image_file)
 
-        # Darken the image
+        # Get brightness value from query parameters (default to 1.0)
+        brightness = float(request.args.get('brightness', 1.0))
+
+        # Adjust brightness
         enhancer = ImageEnhance.Brightness(image)
-        darkened_image = enhancer.enhance(0.8)
+        processed_image = enhancer.enhance(brightness)
 
         # Save the processed image to an in-memory buffer
         img_io = io.BytesIO()
-        darkened_image.save(img_io, format="PNG")
+        processed_image.save(img_io, format="PNG")
         img_io.seek(0)
 
         return send_file(

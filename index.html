@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Darkener App</title>
+    <title>Image Brightness Editor</title>
     <style>
         /* General Reset */
         * {
@@ -17,7 +17,6 @@
             background-color: #f9f9f9;
             color: #333;
             text-align: center;
-            overflow-x: hidden;
         }
 
         header {
@@ -28,10 +27,6 @@
             font-size: 3rem;
             font-weight: bold;
             color: #000;
-        }
-
-        h1 span {
-            color: #999;
         }
 
         p {
@@ -46,7 +41,7 @@
 
         .button-container input {
             font-size: 1rem;
-            padding: 15px 30px;
+            padding: 10px 20px;
             background-color: #3b82f6;
             color: #fff;
             border-radius: 30px;
@@ -61,31 +56,25 @@
             transform: translateY(-3px);
         }
 
-        .image-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 50px;
-            padding: 0 20px;
+        .preview {
+            margin-top: 40px;
         }
 
-        .image-item {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .image-item img {
-            width: 100px;
+        .preview img {
+            max-width: 500px;
             height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
         }
 
-        .image-item:hover {
-            transform: translateY(-5px);
+        .slider-container {
+            margin-top: 20px;
+        }
+
+        .slider-container input {
+            width: 80%;
+            max-width: 500px;
         }
 
         footer {
@@ -104,50 +93,26 @@
         footer a:hover {
             text-decoration: underline;
         }
-
-        .preview {
-            margin-top: 40px;
-        }
-
-        .preview img {
-            max-width: 500px;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
-        }
-
-        .preview button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .preview button:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Darken Your Images <span>Instantly</span></h1>
-        <p>Upload an image, darken it, and download the result!</p>
+        <h1>Adjust Image Brightness</h1>
+        <p>Upload an image and use the slider to adjust its brightness.</p>
         <div class="button-container">
             <form id="uploadForm">
                 <input type="file" id="imageInput" accept="image/*" required>
-                <button type="submit">Upload and Darken</button>
             </form>
         </div>
     </header>
 
     <main>
         <div class="preview" id="result">
-            <!-- Processed image preview and download link will appear here -->
+            <img id="outputImage" alt="Processed Image" style="display: none;">
+        </div>
+        <div class="slider-container" id="sliderContainer" style="display: none;">
+            <label for="brightnessSlider">Adjust Brightness:</label>
+            <input type="range" id="brightnessSlider" min="0.5" max="1.5" step="0.01" value="1">
         </div>
     </main>
 
@@ -157,21 +122,26 @@
 
     <script>
         const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('imageInput');
         const resultDiv = document.getElementById('result');
+        const outputImage = document.getElementById('outputImage');
+        const sliderContainer = document.getElementById('sliderContainer');
+        const brightnessSlider = document.getElementById('brightnessSlider');
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const fileInput = document.getElementById('imageInput');
-            if (!fileInput.files[0]) {
+        let uploadedImage = null;
+
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
                 alert("Please upload an image.");
                 return;
             }
 
             const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
+            formData.append('image', file);
 
             try {
-                const response = await fetch('https://imageeditor-cg6e.onrender.com/process', {
+                const response = await fetch('https://imageeditor-cg6e.onrender.com/process?brightness=1', {
                     method: 'POST',
                     body: formData
                 });
@@ -180,20 +150,43 @@
                     throw new Error("Error processing image");
                 }
 
-                // Get the image blob and create a downloadable link
                 const blob = await response.blob();
-                const imageUrl = URL.createObjectURL(blob);
+                uploadedImage = URL.createObjectURL(blob);
 
-                resultDiv.innerHTML = `
-                    <h3>Processed Image:</h3>
-                    <img src="${imageUrl}" alt="Processed Image">
-                    <br>
-                    <a href="${imageUrl}" download="darkened_image.png">
-                        <button>Download Image</button>
-                    </a>
-                `;
+                // Display the initial processed image
+                outputImage.src = uploadedImage;
+                outputImage.style.display = 'block';
+                sliderContainer.style.display = 'block';
             } catch (error) {
                 resultDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
+            }
+        });
+
+        brightnessSlider.addEventListener('input', async () => {
+            const brightness = brightnessSlider.value;
+
+            if (!uploadedImage) return;
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const response = await fetch(`https://imageeditor-cg6e.onrender.com/process?brightness=${brightness}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error processing image");
+                }
+
+                const blob = await response.blob();
+                const updatedImage = URL.createObjectURL(blob);
+
+                // Update the processed image
+                outputImage.src = updatedImage;
+            } catch (error) {
+                console.error("Error updating image:", error);
             }
         });
     </script>

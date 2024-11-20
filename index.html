@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Brightness Editor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Photo Brightness Editor</h1>
+        
+        <!-- Upload Section -->
+        <input type="file" id="imageInput" accept="image/*" />
+        <canvas id="imageCanvas"></canvas>
+        
+        <!-- Brightness Slider -->
+        <div class="slider-container">
+            <label for="brightness">Adjust Brightness</label>
+            <input type="range" id="brightness" min="0" max="200" value="100">
+        </div>
+        
+        <!-- Download Button -->
+        <button id="downloadBtn">Download Edited Image</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -104,3 +104,11 @@ button:active {
 #downloadBtn:hover {
     background-color: #218838; /* Darker green on hover */
 }
+/* Toggle button styles */
+#toggleBtn {
+    background-color: #6c757d; /* Gray for differentiation */
+}
+
+#toggleBtn:hover {
+    background-color: #5a6268; /* Darker gray on hover */
+}

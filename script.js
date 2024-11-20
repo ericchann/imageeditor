@@ -87,6 +87,47 @@ function resetSliderToMiddle(event) {
     applyAdjustments(); // Apply the reset adjustment
 }
 
+const toggleBtn = document.getElementById('toggleBtn');
+let isShowingOriginal = true; // Tracks whether the original image is displayed
+
+// Toggle between original and edited image
+toggleBtn.addEventListener('click', () => {
+    if (originalImageData && currentImageData) {
+        if (isShowingOriginal) {
+            // Show the edited image
+            ctx.putImageData(currentImageData, 0, 0);
+            toggleBtn.textContent = 'Before';
+        } else {
+            // Show the original image
+            ctx.putImageData(originalImageData, 0, 0);
+            toggleBtn.textContent = 'After';
+        }
+        isShowingOriginal = !isShowingOriginal; // Toggle state
+    }
+});
+
+// Store a backup of the original image on canvas
+let currentImageData = null;
+
+// Apply adjustments and save the current state
+function applyAdjustments() {
+    if (originalImageData) {
+        const brightness = parseInt(brightnessSlider.value, 10);
+        const contrast = parseInt(contrastSlider.value, 10);
+
+        const adjustedImageData = adjustBrightnessAndContrast(originalImageData, brightness, contrast);
+        ctx.putImageData(adjustedImageData, 0, 0);
+
+        // Save the current adjusted state
+        currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Reset toggle state to "After" mode
+        isShowingOriginal = false;
+        toggleBtn.textContent = 'Before';
+    }
+}
+
+
 // Event listeners for sliders
 brightnessSlider.addEventListener('input', applyAdjustments);
 contrastSlider.addEventListener('input', applyAdjustments);

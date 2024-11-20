@@ -61,11 +61,10 @@ function applyAdjustments() {
     }
 }
 
-
 // Adjust brightness and contrast
 function adjustBrightnessAndContrast(imageData, brightness, contrast) {
     const data = new Uint8ClampedArray(imageData.data);
-    const brightnessFactor = brightness / 100; // Now handles negative values
+    const brightnessFactor = brightness / 100; // Handles negative and positive values
     const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
     for (let i = 0; i < data.length; i += 4) {
@@ -77,31 +76,23 @@ function adjustBrightnessAndContrast(imageData, brightness, contrast) {
     return new ImageData(data, imageData.width, imageData.height);
 }
 
-// Add reset-to-middle functionality for sliders
-function resetSliderToMiddle(slider) {
-    slider.value = 0; // Reset slider value to 0 (middle)
-    applyAdjustments(); // Apply the reset adjustment
-}
-
-// Event listeners for brightness slider
-brightnessSlider.addEventListener('input', applyAdjustments);
-
-brightnessSlider.addEventListener('dblclick', () => resetSliderToMiddle(brightnessSlider));
-
-// Event listeners for contrast slider
-contrastSlider.addEventListener('input', applyAdjustments);
-
-contrastSlider.addEventListener('dblclick', () => resetSliderToMiddle(contrastSlider));
-
-
 // Clamp pixel values to [0, 255]
 function clamp(value) {
     return Math.max(0, Math.min(255, value));
 }
 
+// Reset sliders on double click
+function resetSliderToMiddle(event) {
+    event.target.value = 0; // Reset slider value to 0
+    applyAdjustments(); // Apply the reset adjustment
+}
+
 // Event listeners for sliders
 brightnessSlider.addEventListener('input', applyAdjustments);
 contrastSlider.addEventListener('input', applyAdjustments);
+
+brightnessSlider.addEventListener('dblclick', resetSliderToMiddle);
+contrastSlider.addEventListener('dblclick', resetSliderToMiddle);
 
 // Download the edited image
 downloadBtn.addEventListener('click', () => {

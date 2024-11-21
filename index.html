@@ -3,37 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Brightness Editor</title>
+    <title>Photo Editor</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Photo Brightness Editor</h1>
-        
-        <!-- Upload Section -->
-        <input type="file" id="imageInput" accept="image/*" />
-        <canvas id="imageCanvas"></canvas>
+    <header class="header">
+        <input type="text" placeholder="Search..." class="search-bar">
+    </header>
 
-        
-        <!-- Brightness and Contrast Slider -->
-        <div class="button-container">
-            <button id="exampleBtn">Example</button>
-            <button id="toggleBtn">Before</button>
+    <div class="main-container">
+        <!-- Left Image Preview -->
+        <div class="image-preview">
+            <canvas id="imageCanvas"></canvas>
         </div>
-        <div class="slider-container">
-            <label for="brightness">Adjust Brightness</label>
-            <input type="range" id="brightness" min="-100" max="100" value="0">
+
+        <!-- Right Control Panel -->
+        <div class="control-panel">
+            <div class="panel-section">
+                <h2>Light</h2>
+                <label>Brightness</label>
+                <input type="range" id="brightness" min="-100" max="100" value="0">
+                <label>Contrast</label>
+                <input type="range" id="contrast" min="-100" max="100" value="0">
+            </div>
+            <div class="panel-section">
+                <h2>Color</h2>
+                <label>Vibrance</label>
+                <input type="range" id="vibrance" min="-100" max="100" value="0">
+                <label>Saturation</label>
+                <input type="range" id="saturation" min="-100" max="100" value="0">
+            </div>
+            <button id="toggleBtn">Before/After</button>
+            <button id="downloadBtn">Download</button>
         </div>
-        <div class="slider-container">
-            <label for="contrast">Adjust Contrast</label>
-            <input type="range" id="contrast" min="-100" max="100" value="0">
-        </div>
-        
-        
-        
-        <!-- Download Button -->
-        <button id="downloadBtn">Download Edited Image</button>
-        
+    </div>
+
+    <!-- Thumbnail Gallery -->
+    <div class="thumbnail-gallery">
+        <img src="thumb1.jpg" alt="Thumbnail 1">
+        <img src="thumb2.jpg" alt="Thumbnail 2">
+        <img src="thumb3.jpg" alt="Thumbnail 3">
     </div>
 
     <script src="script.js"></script>

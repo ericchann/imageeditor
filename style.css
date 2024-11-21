@@ -1,114 +1,146 @@
-/* General styles */
-body {
-    font-family: Helvetica, Arial, sans-serif;
-    text-align: center;
+/* General Reset */
+body, html {
     margin: 0;
     padding: 0;
-    background-color: #1a2a3a; /* Navy blue background */
+    box-sizing: border-box;
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #1a1a1a; /* Dark background for modern look */
     color: #f0f0f0; /* Light text for contrast */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    border: 1px solid #2b3b4b; /* Darker border for subtle contrast */
-    background: #1e2e3e; /* Slightly lighter navy blue */
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Modern shadow effect */
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #444;
 }
 
-/* Canvas styling */
-canvas {
-    display: block;
-    margin: 20px auto;
-    max-width: 100%;
-    border: 1px solid #3b4b5b;
-    background-color: #f9f9f9; /* White background for canvas */
+.search-bar {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
     border-radius: 5px;
+    background-color: #333;
+    color: #fff;
 }
 
-/* Slider container styles */
-.slider-container {
-    margin: 20px 0;
+/* Main Container */
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Left: Image Preview */
+.image-preview {
+    flex: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+    border-right: 1px solid #444;
+    padding: 10px;
+}
+
+canvas {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 5px;
+    background-color: #222;
+}
+
+/* Right: Control Panel */
+.control-panel {
+    flex: 1;
+    background-color: #2a2a2a;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.panel-section {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.panel-section h2 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #ddd;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
 }
 
 label {
     display: block;
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: 16px;
+    margin-bottom: 5px;
+    font-size: 14px;
 }
 
-/* Input slider styling */
 input[type="range"] {
-    -webkit-appearance: none;
     width: 100%;
+    -webkit-appearance: none;
+    background: #444;
     height: 8px;
-    background: #3b4b5b;
     border-radius: 5px;
-    outline: none;
-    opacity: 0.9;
-    transition: opacity 0.2s;
-    cursor: pointer;
-}
-
-input[type="range"]:hover {
-    opacity: 1;
+    margin-bottom: 15px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: #f0f0f0;
-    border: 2px solid #007bff;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-    background: #0056b3;
-}
-
-/* Button styles */
+/* Buttons */
 button {
-    background-color: #007bff; /* Bright navy blue */
+    background-color: #007bff;
     color: white;
     border: none;
-    padding: 15px 30px; /* Larger button size */
-    font-size: 18px; /* Modern font size */
+    padding: 10px;
+    font-size: 16px;
     cursor: pointer;
-    border-radius: 8px; /* Rounded corners for a modern look */
-    margin: 10px 0;
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    background-color: #0056b3;
 }
 
-button:active {
-    transform: scale(0.98); /* Shrink slightly on click */
+/* Thumbnail Gallery */
+.thumbnail-gallery {
+    display: flex;
+    justify-content: center;
+    background-color: #1a1a1a;
+    padding: 10px;
+    gap: 10px;
+    border-top: 1px solid #444;
 }
 
-/* Specific button styles */
-#downloadBtn {
-    background-color: #28a745; /* Green for download button */
+.thumbnail-gallery img {
+    width: 100px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
-#downloadBtn:hover {
-    background-color: #218838; /* Darker green on hover */
-}
-/* Toggle button styles */
-#toggleBtn {
-    background-color: #6c757d; /* Gray for differentiation */
-}
-
-#toggleBtn:hover {
-    background-color: #5a6268; /* Darker gray on hover */
+.thumbnail-gallery img:hover {
+    transform: scale(1.05);
 }

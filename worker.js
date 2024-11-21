@@ -1,11 +1,20 @@
+// Clamp function defined before it's used
+function clamp(value) {
+    return Math.max(0, Math.min(255, value));
+}
+
 self.onmessage = function (e) {
     const { imageData, adjustments } = e.data;
     const data = new Uint8ClampedArray(imageData.data);
 
-    const brightness = adjustments.brightness / 100;
-    const contrast = (259 * (adjustments.contrast + 255)) / (255 * (259 - adjustments.contrast));
-    const vibrance = adjustments.vibrance / 100;
-    const saturation = adjustments.saturation / 100;
+    // Adjust the scaling factors appropriately
+    const brightness = adjustments.brightness; // Assuming range -100 to +100
+    const contrast = adjustments.contrast;     // Assuming range -100 to +100
+    const vibrance = adjustments.vibrance / 100; // Scale to 0-1
+    const saturation = adjustments.saturation / 100; // Scale to 0-1
+
+    // Precompute contrast factor
+    const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
     for (let i = 0; i < data.length; i += 4) {
         let r = data[i];
@@ -13,13 +22,14 @@ self.onmessage = function (e) {
         let b = data[i + 2];
 
         // Brightness and Contrast
-        r = clamp(contrast * (r - 128) + 128 + brightness * 255);
-        g = clamp(contrast * (g - 128) + 128 + brightness * 255);
-        b = clamp(contrast * (b - 128) + 128 + brightness * 255);
+        r = clamp(contrastFactor * (r - 128) + 128 + brightness);
+        g = clamp(contrastFactor * (g - 128) + 128 + brightness);
+        b = clamp(contrastFactor * (b - 128) + 128 + brightness);
 
         // Vibrance
         const max = Math.max(r, g, b);
-        const avg = (r + g + b) / 3;
+        // Avoid division by zero for average
+        const avg = (r + g + b) / 3 || 1;
         r += (max - r) * vibrance;
         g += (max - g) * vibrance;
         b += (max - b) * vibrance;
@@ -33,11 +43,9 @@ self.onmessage = function (e) {
         data[i] = clamp(r);
         data[i + 1] = clamp(g);
         data[i + 2] = clamp(b);
+        // Alpha channel remains unchanged (data[i + 3])
     }
 
+    // Post the processed image data back to the main thread
     self.postMessage(new ImageData(data, imageData.width, imageData.height));
 };
-
-function clamp(value) {
-    return Math.max(0, Math.min(255, value));
-}

@@ -36,6 +36,7 @@ function resizeCanvas(image) {
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    currentImageData = originalImageData; // Initialize currentImageData
 }
 
 // Load and display an image
@@ -49,6 +50,7 @@ imageInput.addEventListener('change', (event) => {
 
             image.onload = () => {
                 resizeCanvas(image);
+                resetSliders();
             };
         };
         reader.readAsDataURL(file);
@@ -63,6 +65,7 @@ exampleBtn.addEventListener('click', () => {
 
     image.onload = () => {
         resizeCanvas(image);
+        resetSliders();
     };
     image.onerror = () => {
         alert('Failed to load the example image. Please check the file path.');
@@ -86,6 +89,14 @@ function applyAdjustments() {
 // Reset slider to its default value on double click
 function resetSliderToMiddle(event) {
     event.target.value = 0;
+    applyAdjustments();
+}
+
+// Reset all sliders to default (0)
+function resetSliders() {
+    [brightnessSlider, contrastSlider, vibranceSlider, saturationSlider].forEach(slider => {
+        slider.value = 0;
+    });
     applyAdjustments();
 }
 

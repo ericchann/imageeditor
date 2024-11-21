@@ -185,29 +185,17 @@ function applyToneCurve() {
 }
 
 // Create a tone curve mapping (256 -> 256 values)
+let toneCurveCache = null;
+
 function createToneCurveMapping() {
-    const mapping = new Uint8Array(256);
-
-    for (let i = 0; i < 256; i++) {
-        const inputX = (i / 255) * toneCurveCanvas.width;
-        let outputY = toneCurveCanvas.height;
-
-        // Interpolate output value from the tone curve
-        for (let j = 0; j < toneCurvePoints.length - 1; j++) {
-            const p1 = toneCurvePoints[j];
-            const p2 = toneCurvePoints[j + 1];
-
-            if (inputX >= p1.x && inputX <= p2.x) {
-                const t = (inputX - p1.x) / (p2.x - p1.x); // Linear interpolation factor
-                outputY = p1.y * (1 - t) + p2.y * t;
-                break;
-            }
+    if (!toneCurveCache) {
+        toneCurveCache = new Uint8Array(256);
+        for (let i = 0; i < 256; i++) {
+            // Calculate mapping here (as before)
+            toneCurveCache[i] = calculateMapping(i);
         }
-
-        mapping[i] = 255 - (outputY / toneCurveCanvas.height) * 255;
     }
-
-    return mapping;
+    return toneCurveCache;
 }
 
 // Initialize tone curve
@@ -317,39 +305,26 @@ toggleBtn.addEventListener('click', () => {
 // Store a backup of the current image after adjustments
 let currentImageData = null;
 
-// Apply adjustments and save the current state
+//Use the worker to apply adjustments
+const worker = new Worker('worker.js');
+
+worker.onmessage = function (e) {
+    ctx.putImageData(e.data, 0, 0);
+    currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+};
+
 function applyAdjustments() {
     if (originalImageData) {
-        const brightness = parseInt(brightnessSlider.value, 10);
-        const contrast = parseInt(contrastSlider.value, 10);
-        const vibrance = parseInt(vibranceSlider.value, 10);
-        const saturation = parseInt(saturationSlider.value, 10);
+        const adjustments = {
+            brightness: parseInt(brightnessSlider.value, 10),
+            contrast: parseInt(contrastSlider.value, 10),
+            vibrance: parseInt(vibranceSlider.value, 10),
+            saturation: parseInt(saturationSlider.value, 10),
+        };
 
-        // Start with the original image data
-        let adjustedImageData = new ImageData(
-            new Uint8ClampedArray(originalImageData.data),
-            originalImageData.width,
-            originalImageData.height
-        );
-
-        // Apply each adjustment in sequence
-        adjustedImageData = adjustBrightnessAndContrast(adjustedImageData, brightness, contrast);
-        adjustedImageData = adjustVibrance(adjustedImageData, vibrance);
-        adjustedImageData = adjustSaturation(adjustedImageData, saturation);
-
-        // Update the canvas with the final result
-        ctx.putImageData(adjustedImageData, 0, 0);
-
-        // Save the adjusted state
-        currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-        // Reset toggle state
-        isShowingOriginal = false;
-        toggleBtn.textContent = 'Before';
+        worker.postMessage({ imageData: originalImageData, adjustments });
     }
 }
-
-
 
 
 // Event listeners for sliders
@@ -366,3 +341,14 @@ downloadBtn.addEventListener('click', () => {
     link.href = canvas.toDataURL();
     link.click();
 });
+
+function resizeCanvas(image) {
+    const maxWidth = 1000; // Max display width
+    const scale = Math.min(1, maxWidth / image.width);
+    canvas.width = image.width * scale;
+    canvas.height = image.height * scale;
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+

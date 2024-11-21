@@ -216,29 +216,6 @@ drawToneCurve();
 const vibranceSlider = document.getElementById('vibrance');
 const saturationSlider = document.getElementById('saturation');
 
-// Apply adjustments, including vibrance and saturation
-function applyAdjustments() {
-    if (originalImageData) {
-        const brightness = parseInt(brightnessSlider.value, 10);
-        const contrast = parseInt(contrastSlider.value, 10);
-        const vibrance = parseInt(vibranceSlider.value, 10);
-        const saturation = parseInt(saturationSlider.value, 10);
-
-        let adjustedImageData = adjustBrightnessAndContrast(originalImageData, brightness, contrast);
-        adjustedImageData = adjustVibrance(adjustedImageData, vibrance);
-        adjustedImageData = adjustSaturation(adjustedImageData, saturation);
-
-        ctx.putImageData(adjustedImageData, 0, 0);
-
-        // Save the adjusted state
-        currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-        // Reset toggle state
-        isShowingOriginal = false;
-        toggleBtn.textContent = 'Before';
-    }
-}
-
 // Adjust vibrance
 function adjustVibrance(imageData, vibrance) {
     const data = new Uint8ClampedArray(imageData.data);
@@ -345,18 +322,33 @@ function applyAdjustments() {
     if (originalImageData) {
         const brightness = parseInt(brightnessSlider.value, 10);
         const contrast = parseInt(contrastSlider.value, 10);
+        const vibrance = parseInt(vibranceSlider.value, 10);
+        const saturation = parseInt(saturationSlider.value, 10);
 
-        const adjustedImageData = adjustBrightnessAndContrast(originalImageData, brightness, contrast);
+        // Start with the original image data
+        let adjustedImageData = new ImageData(
+            new Uint8ClampedArray(originalImageData.data),
+            originalImageData.width,
+            originalImageData.height
+        );
+
+        // Apply each adjustment in sequence
+        adjustedImageData = adjustBrightnessAndContrast(adjustedImageData, brightness, contrast);
+        adjustedImageData = adjustVibrance(adjustedImageData, vibrance);
+        adjustedImageData = adjustSaturation(adjustedImageData, saturation);
+
+        // Update the canvas with the final result
         ctx.putImageData(adjustedImageData, 0, 0);
 
-        // Save the current adjusted state
+        // Save the adjusted state
         currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-        // Reset toggle button to show the edited image
+        // Reset toggle state
         isShowingOriginal = false;
         toggleBtn.textContent = 'Before';
     }
 }
+
 
 
 

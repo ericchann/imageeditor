@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
-        <input type="text" placeholder="Search..." class="search-bar">
-    </header>
-
     <div class="main-container">
         <!-- Left Image Preview -->
         <div class="image-preview">
@@ -20,29 +16,25 @@
         <!-- Right Control Panel -->
         <div class="control-panel">
             <div class="panel-section">
+                <h2>Actions</h2>
+                <input type="file" id="imageInput" accept="image/*">
+                <button id="exampleBtn">Load Example</button>
+                <button id="toggleBtn">Before</button>
+            </div>
+
+            <div class="panel-section">
                 <h2>Light</h2>
                 <label>Brightness</label>
                 <input type="range" id="brightness" min="-100" max="100" value="0">
                 <label>Contrast</label>
                 <input type="range" id="contrast" min="-100" max="100" value="0">
             </div>
-            <div class="panel-section">
-                <h2>Color</h2>
-                <label>Vibrance</label>
-                <input type="range" id="vibrance" min="-100" max="100" value="0">
-                <label>Saturation</label>
-                <input type="range" id="saturation" min="-100" max="100" value="0">
-            </div>
-            <button id="toggleBtn">Before/After</button>
-            <button id="downloadBtn">Download</button>
-        </div>
-    </div>
 
-    <!-- Thumbnail Gallery -->
-    <div class="thumbnail-gallery">
-        <img src="thumb1.jpg" alt="Thumbnail 1">
-        <img src="thumb2.jpg" alt="Thumbnail 2">
-        <img src="thumb3.jpg" alt="Thumbnail 3">
+            <div class="panel-section">
+                <h2>Download</h2>
+                <button id="downloadBtn">Download</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

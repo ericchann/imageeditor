@@ -213,6 +213,93 @@ function createToneCurveMapping() {
 // Initialize tone curve
 drawToneCurve();
 
+const vibranceSlider = document.getElementById('vibrance');
+const saturationSlider = document.getElementById('saturation');
+
+// Apply adjustments, including vibrance and saturation
+function applyAdjustments() {
+    if (originalImageData) {
+        const brightness = parseInt(brightnessSlider.value, 10);
+        const contrast = parseInt(contrastSlider.value, 10);
+        const vibrance = parseInt(vibranceSlider.value, 10);
+        const saturation = parseInt(saturationSlider.value, 10);
+
+        let adjustedImageData = adjustBrightnessAndContrast(originalImageData, brightness, contrast);
+        adjustedImageData = adjustVibrance(adjustedImageData, vibrance);
+        adjustedImageData = adjustSaturation(adjustedImageData, saturation);
+
+        ctx.putImageData(adjustedImageData, 0, 0);
+
+        // Save the adjusted state
+        currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Reset toggle state
+        isShowingOriginal = false;
+        toggleBtn.textContent = 'Before';
+    }
+}
+
+// Adjust vibrance
+function adjustVibrance(imageData, vibrance) {
+    const data = new Uint8ClampedArray(imageData.data);
+    const factor = vibrance / 100;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // Calculate average and max RGB values
+        const avg = (r + g + b) / 3;
+        const max = Math.max(r, g, b);
+
+        // Adjust vibrance for muted colors (based on the difference from the max)
+        data[i] += (max - r) * factor;     // Red
+        data[i + 1] += (max - g) * factor; // Green
+        data[i + 2] += (max - b) * factor; // Blue
+    }
+
+    return new ImageData(data, imageData.width, imageData.height);
+}
+
+// Adjust saturation
+function adjustSaturation(imageData, saturation) {
+    const data = new Uint8ClampedArray(imageData.data);
+    const factor = saturation / 100;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // Convert RGB to grayscale
+        const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+
+        // Apply saturation adjustment
+        data[i] = gray + (r - gray) * (1 + factor); // Red
+        data[i + 1] = gray + (g - gray) * (1 + factor); // Green
+        data[i + 2] = gray + (b - gray) * (1 + factor); // Blue
+    }
+
+    return new ImageData(data, imageData.width, imageData.height);
+}
+
+// Add event listeners for vibrance and saturation sliders
+vibranceSlider.addEventListener('input', applyAdjustments);
+saturationSlider.addEventListener('input', applyAdjustments);
+
+vibranceSlider.addEventListener('dblclick', resetSliderToMiddle);
+saturationSlider.addEventListener('dblclick', resetSliderToMiddle);
+
+
+
+
+
+
+
+
+
+
 
 // Clamp pixel values to [0, 255]
 function clamp(value) {

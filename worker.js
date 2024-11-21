@@ -1,3 +1,5 @@
+// worker.js
+
 // Clamp function defined before it's used
 function clamp(value) {
     return Math.max(0, Math.min(255, value));
@@ -5,44 +7,53 @@ function clamp(value) {
 
 self.onmessage = function (e) {
     const { imageData, adjustments } = e.data;
-    const data = new Uint8ClampedArray(imageData.data);
+    const data = new Uint8ClampedArray(imageData.data); // Create a copy to avoid modifying original data
 
-    // Adjust the scaling factors appropriately
-    const brightness = adjustments.brightness; // Assuming range -100 to +100
-    const contrast = adjustments.contrast;     // Assuming range -100 to +100
-    const vibrance = adjustments.vibrance / 100; // Scale to 0-1
-    const saturation = adjustments.saturation / 100; // Scale to 0-1
+    // Extract adjustment values
+    const brightness = adjustments.brightness; // Range: -100 to +100
+    const contrast = adjustments.contrast;     // Range: -100 to +100
+    const vibrance = adjustments.vibrance;     // Range: 0 to +100
+    const saturation = adjustments.saturation; // Range: 0 to +100
 
-    // Precompute contrast factor
+    // Calculate contrast factor
     const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+    // Scale vibrance and saturation to 0-1
+    const vibranceFactor = vibrance / 100;
+    const saturationFactor = saturation / 100;
 
     for (let i = 0; i < data.length; i += 4) {
         let r = data[i];
         let g = data[i + 1];
         let b = data[i + 2];
 
-        // Brightness and Contrast
-        r = clamp(contrastFactor * (r - 128) + 128 + brightness);
-        g = clamp(contrastFactor * (g - 128) + 128 + brightness);
-        b = clamp(contrastFactor * (b - 128) + 128 + brightness);
+        // Apply Brightness
+        r = clamp(r + brightness);
+        g = clamp(g + brightness);
+        b = clamp(b + brightness);
 
-        // Vibrance
+        // Apply Contrast
+        r = clamp(contrastFactor * (r - 128) + 128);
+        g = clamp(contrastFactor * (g - 128) + 128);
+        b = clamp(contrastFactor * (b - 128) + 128);
+
+        // Apply Vibrance
         const max = Math.max(r, g, b);
         // Avoid division by zero for average
         const avg = (r + g + b) / 3 || 1;
-        r += (max - r) * vibrance;
-        g += (max - g) * vibrance;
-        b += (max - b) * vibrance;
+        r += (max - r) * vibranceFactor;
+        g += (max - g) * vibranceFactor;
+        b += (max - b) * vibranceFactor;
 
-        // Saturation
+        // Apply Saturation
         const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
-        r = gray + (r - gray) * (1 + saturation);
-        g = gray + (g - gray) * (1 + saturation);
-        b = gray + (b - gray) * (1 + saturation);
+        r = clamp(gray + (r - gray) * (1 + saturationFactor));
+        g = clamp(gray + (g - gray) * (1 + saturationFactor));
+        b = clamp(gray + (b - gray) * (1 + saturationFactor));
 
-        data[i] = clamp(r);
-        data[i + 1] = clamp(g);
-        data[i + 2] = clamp(b);
+        data[i] = r;
+        data[i + 1] = g;
+        data[i + 2] = b;
         // Alpha channel remains unchanged (data[i + 3])
     }
 

@@ -1,3 +1,5 @@
+// script.js
+
 const imageInput = document.getElementById('imageInput');
 const brightnessSlider = document.getElementById('brightness');
 const contrastSlider = document.getElementById('contrast');
@@ -14,13 +16,28 @@ let currentImageData = null;
 let isShowingOriginal = false;
 
 // Initialize Web Worker
-const worker = new Worker('worker.js');
+let worker;
+try {
+    worker = new Worker('worker.js');
+} catch (error) {
+    console.error('Failed to initialize Web Worker:', error);
+}
 
-worker.onmessage = function (e) {
-    // Update canvas with the processed image data
-    ctx.putImageData(e.data, 0, 0);
-    currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-};
+if (worker) {
+    worker.onmessage = function (e) {
+        // Update canvas with the processed image data
+        try {
+            ctx.putImageData(e.data, 0, 0);
+            currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } catch (error) {
+            console.error('Error updating canvas with processed image data:', error);
+        }
+    };
+
+    worker.onerror = function (e) {
+        console.error(`Worker error: ${e.message} on line ${e.lineno}`);
+    };
+}
 
 // Clamp values between 0 and 255
 function clamp(value) {
@@ -52,6 +69,9 @@ imageInput.addEventListener('change', (event) => {
                 resizeCanvas(image);
                 resetSliders();
             };
+            image.onerror = () => {
+                alert('Failed to load the selected image. Please try another file.');
+            };
         };
         reader.readAsDataURL(file);
     }
@@ -59,7 +79,7 @@ imageInput.addEventListener('change', (event) => {
 
 // Load an example image
 exampleBtn.addEventListener('click', () => {
-    const exampleImageSrc = 'Monitor-Calibration.jpg';
+    const exampleImageSrc = 'Monitor-Calibration.jpg'; // Ensure this path is correct
     const image = new Image();
     image.src = exampleImageSrc;
 
@@ -74,13 +94,16 @@ exampleBtn.addEventListener('click', () => {
 
 // Apply adjustments using Web Worker
 function applyAdjustments() {
-    if (originalImageData) {
+    if (originalImageData && worker) {
         const adjustments = {
             brightness: parseInt(brightnessSlider.value, 10),
             contrast: parseInt(contrastSlider.value, 10),
             vibrance: parseInt(vibranceSlider.value, 10),
             saturation: parseInt(saturationSlider.value, 10),
         };
+
+        // Debugging: Log adjustments
+        console.log('Applying adjustments:', adjustments);
 
         worker.postMessage({ imageData: originalImageData, adjustments });
     }
@@ -100,9 +123,22 @@ function resetSliders() {
     applyAdjustments();
 }
 
-// Event listeners for sliders
+// Debounce function to limit the rate of adjustments
+function debounce(func, delay) {
+    let debounceTimer;
+    return function () {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+// Event listeners for sliders with debounce to optimize performance
+const debouncedApplyAdjustments = debounce(applyAdjustments, 100);
+
 [brightnessSlider, contrastSlider, vibranceSlider, saturationSlider].forEach((slider) => {
-    slider.addEventListener('input', applyAdjustments);
+    slider.addEventListener('input', debouncedApplyAdjustments);
     slider.addEventListener('dblclick', resetSliderToMiddle);
 });
 
@@ -123,6 +159,11 @@ toggleBtn.addEventListener('click', () => {
 
 // Download the edited image
 downloadBtn.addEventListener('click', () => {
+    if (!currentImageData) {
+        alert('No image to download.');
+        return;
+    }
+
     const link = document.createElement('a');
     link.download = 'edited-photo.png';
     link.href = canvas.toDataURL();

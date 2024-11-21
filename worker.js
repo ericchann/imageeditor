@@ -12,16 +12,19 @@ self.onmessage = function (e) {
         let g = data[i + 1];
         let b = data[i + 2];
 
-        r = contrast * (r - 128) + 128 + brightness * 255;
-        g = contrast * (g - 128) + 128 + brightness * 255;
-        b = contrast * (b - 128) + 128 + brightness * 255;
+        // Brightness and Contrast
+        r = clamp(contrast * (r - 128) + 128 + brightness * 255);
+        g = clamp(contrast * (g - 128) + 128 + brightness * 255);
+        b = clamp(contrast * (b - 128) + 128 + brightness * 255);
 
+        // Vibrance
         const max = Math.max(r, g, b);
         const avg = (r + g + b) / 3;
         r += (max - r) * vibrance;
         g += (max - g) * vibrance;
         b += (max - b) * vibrance;
 
+        // Saturation
         const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
         r = gray + (r - gray) * (1 + saturation);
         g = gray + (g - gray) * (1 + saturation);
@@ -34,3 +37,7 @@ self.onmessage = function (e) {
 
     self.postMessage(new ImageData(data, imageData.width, imageData.height));
 };
+
+function clamp(value) {
+    return Math.max(0, Math.min(255, value));
+}

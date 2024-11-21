@@ -76,6 +76,144 @@ function adjustBrightnessAndContrast(imageData, brightness, contrast) {
     return new ImageData(data, imageData.width, imageData.height);
 }
 
+const toneCurveCanvas = document.getElementById('toneCurveCanvas');
+const toneCtx = toneCurveCanvas.getContext('2d');
+
+// Default tone curve points (linear line)
+let toneCurvePoints = [
+    { x: 0, y: 200 },  // Shadows
+    { x: 150, y: 100 }, // Midtones
+    { x: 300, y: 0 }    // Highlights
+];
+
+// Draw the tone curve
+function drawToneCurve() {
+    toneCtx.clearRect(0, 0, toneCurveCanvas.width, toneCurveCanvas.height);
+
+    // Draw background grid
+    toneCtx.strokeStyle = '#555';
+    toneCtx.lineWidth = 1;
+    for (let i = 50; i < toneCurveCanvas.width; i += 50) {
+        toneCtx.beginPath();
+        toneCtx.moveTo(i, 0);
+        toneCtx.lineTo(i, toneCurveCanvas.height);
+        toneCtx.stroke();
+    }
+    for (let i = 50; i < toneCurveCanvas.height; i += 50) {
+        toneCtx.beginPath();
+        toneCtx.moveTo(0, i);
+        toneCtx.lineTo(toneCurveCanvas.width, i);
+        toneCtx.stroke();
+    }
+
+    // Draw tone curve
+    toneCtx.strokeStyle = '#007bff';
+    toneCtx.lineWidth = 2;
+    toneCtx.beginPath();
+    toneCtx.moveTo(toneCurvePoints[0].x, toneCurvePoints[0].y);
+    for (let i = 1; i < toneCurvePoints.length; i++) {
+        toneCtx.lineTo(toneCurvePoints[i].x, toneCurvePoints[i].y);
+    }
+    toneCtx.stroke();
+
+    // Draw draggable points
+    toneCtx.fillStyle = '#fff';
+    toneCurvePoints.forEach((point) => {
+        toneCtx.beginPath();
+        toneCtx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+        toneCtx.fill();
+    });
+}
+
+// Adjust the tone curve based on user input
+toneCurveCanvas.addEventListener('mousedown', (event) => {
+    const rect = toneCurveCanvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Check if the click is near an existing point
+    let draggingPoint = null;
+    for (const point of toneCurvePoints) {
+        if (Math.hypot(point.x - mouseX, point.y - mouseY) < 10) {
+            draggingPoint = point;
+            break;
+        }
+    }
+
+    if (draggingPoint) {
+        const onMouseMove = (moveEvent) => {
+            const moveX = moveEvent.clientX - rect.left;
+            const moveY = moveEvent.clientY - rect.top;
+
+            // Update point position (constrain within bounds)
+            draggingPoint.x = Math.max(0, Math.min(toneCurveCanvas.width, moveX));
+            draggingPoint.y = Math.max(0, Math.min(toneCurveCanvas.height, moveY));
+
+            drawToneCurve();
+        };
+
+        const onMouseUp = () => {
+            toneCurveCanvas.removeEventListener('mousemove', onMouseMove);
+            toneCurveCanvas.removeEventListener('mouseup', onMouseUp);
+            applyToneCurve(); // Apply tone curve after dragging
+        };
+
+        toneCurveCanvas.addEventListener('mousemove', onMouseMove);
+        toneCurveCanvas.addEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Map tone curve adjustments to image
+function applyToneCurve() {
+    if (!originalImageData) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // Create a tone curve mapping
+    const curveMapping = createToneCurveMapping();
+
+    // Apply tone curve
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = curveMapping[data[i]];     // Red
+        data[i + 1] = curveMapping[data[i + 1]]; // Green
+        data[i + 2] = curveMapping[data[i + 2]]; // Blue
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    currentImageData = imageData; // Update adjusted state
+}
+
+// Create a tone curve mapping (256 -> 256 values)
+function createToneCurveMapping() {
+    const mapping = new Uint8Array(256);
+
+    for (let i = 0; i < 256; i++) {
+        const inputX = (i / 255) * toneCurveCanvas.width;
+        let outputY = toneCurveCanvas.height;
+
+        // Interpolate output value from the tone curve
+        for (let j = 0; j < toneCurvePoints.length - 1; j++) {
+            const p1 = toneCurvePoints[j];
+            const p2 = toneCurvePoints[j + 1];
+
+            if (inputX >= p1.x && inputX <= p2.x) {
+                const t = (inputX - p1.x) / (p2.x - p1.x); // Linear interpolation factor
+                outputY = p1.y * (1 - t) + p2.y * t;
+                break;
+            }
+        }
+
+        mapping[i] = 255 - (outputY / toneCurveCanvas.height) * 255;
+    }
+
+    return mapping;
+}
+
+// Initialize tone curve
+drawToneCurve();
+
+
 // Clamp pixel values to [0, 255]
 function clamp(value) {
     return Math.max(0, Math.min(255, value));

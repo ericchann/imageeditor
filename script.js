@@ -32,7 +32,7 @@ imageInput.addEventListener('change', (event) => {
 
 // Load the example photo
 exampleBtn.addEventListener('click', () => {
-    const exampleImageSrc = 'IMG_1879.JPG'; // Replace with the path to your photo in the repo
+    const exampleImageSrc = 'Monitor-Calibration.jpg'; // Replace with the path to your photo in the repo
     const image = new Image();
     image.src = exampleImageSrc;
 
